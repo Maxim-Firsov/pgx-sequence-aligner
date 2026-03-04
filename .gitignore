@@ -1,17 +1,5 @@
-# Python
 __pycache__/
-*.py[cod]
+*.pyc
 .venv/
-venv/
-.env
-.env.*
-
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# Outputs
-outputs/
-*.log
+.pytest_cache/
+.ruff_cache/

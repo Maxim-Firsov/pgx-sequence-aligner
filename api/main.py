@@ -12,9 +12,18 @@ class AlignRequest(BaseModel):
     match: int = 1
     mismatch: int = -1
     gap: int = -2
+    mode: str = "global"
+    gap_model: str = "linear"
+    gap_open: int = -3
+    gap_extend: int = -1
 
 
 app = FastAPI()
+
+
+@app.get("/health")
+def healthcheck() -> dict:
+    return {"status": "ok"}
 
 
 @app.post("/align")
@@ -25,4 +34,8 @@ def align_sequences(payload: AlignRequest) -> dict:
         match=payload.match,
         mismatch=payload.mismatch,
         gap=payload.gap,
+        mode=payload.mode,
+        gap_model=payload.gap_model,
+        gap_open=payload.gap_open,
+        gap_extend=payload.gap_extend,
     )
