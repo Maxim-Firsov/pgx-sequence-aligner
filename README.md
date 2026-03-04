@@ -1,6 +1,6 @@
 # PGx Sequence Aligner
 
-Pairwise sequence alignment showcase built around pharmacogenomics-flavored DNA examples. The project focuses on the part that is technically defensible in an interview: dynamic programming, scoring schemes, affine versus linear gaps, and exposing the algorithm through both a CLI and a small FastAPI service.
+Pairwise sequence alignment showcase built around pharmacogenomics-flavored DNA examples. The project emphasizes dynamic programming, scoring schemes, affine versus linear gaps, and exposing the algorithm through both a CLI and a small FastAPI service.
 
 ## Problem Statement
 
@@ -90,7 +90,7 @@ Content-Type: application/json
 
 ## Design Decisions
 
-- Affine gaps were added because bioinformatics reviewers expect a distinction between opening a gap and extending one.
+- Affine gaps were added because bioinformatics workflows distinguish between opening a gap and extending one.
 - Local alignment remains useful for short shared windows where full-length alignment would dilute the signal.
 - The implementation stays dependency-light so the scoring logic is readable enough to discuss line-by-line.
 
@@ -100,7 +100,7 @@ Content-Type: application/json
 - The scoring system is intentionally simple and does not yet use substitution matrices.
 - Input handling is designed for short educational/demo FASTA files rather than large batch workflows.
 
-## How To Run
+## Running The Project
 
 ```powershell
 python -m pip install -r requirements.txt
