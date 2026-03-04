@@ -23,11 +23,13 @@ app = FastAPI()
 
 @app.get("/health")
 def healthcheck() -> dict:
+    """Minimal liveness endpoint for service checks and smoke tests."""
     return {"status": "ok"}
 
 
 @app.post("/align")
 def align_sequences(payload: AlignRequest) -> dict:
+    """Expose the alignment routine behind a small JSON API surface."""
     return align(
         payload.seq_a,
         payload.seq_b,

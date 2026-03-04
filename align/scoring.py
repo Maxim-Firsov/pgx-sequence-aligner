@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ScoringScheme:
-    """Simple affine-free scoring controls for pairwise alignment."""
+    """Scoring controls shared by linear-gap and affine-gap alignment paths."""
 
     match: int = 1
     mismatch: int = -1
@@ -16,6 +16,8 @@ class ScoringScheme:
     wildcard_score: int = 0
 
     def score_pair(self, base_a: str, base_b: str) -> int:
+        # Ambiguous nucleotide calls are treated as neutral evidence rather than
+        # forcing either a match reward or mismatch penalty.
         if base_a == self.wildcard or base_b == self.wildcard:
             return self.wildcard_score
         return self.match if base_a == base_b else self.mismatch

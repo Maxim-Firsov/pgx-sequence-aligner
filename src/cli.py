@@ -21,6 +21,8 @@ def read_fasta_sequences(path: Path) -> list[str]:
         if not line:
             continue
         if line.startswith(">"):
+            # FASTA headers delimit records; sequence lines are concatenated so
+            # wrapped inputs behave like contiguous biological sequences.
             if current:
                 sequences.append("".join(current))
                 current = []
@@ -61,6 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    """Run the aligner against the first two FASTA records and print a compact report."""
     args = build_parser().parse_args()
     fasta_path = Path(args.input).expanduser().resolve()
     sequences = read_fasta_sequences(fasta_path)

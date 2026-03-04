@@ -6,6 +6,7 @@ NEG_INF = -10**9
 
 
 def _build_stats(aligned_a: str, aligned_b: str) -> dict:
+    """Compute simple alignment quality metrics from the reconstructed strings."""
     matches = 0
     mismatches = 0
     gap_count = 0
@@ -43,6 +44,7 @@ def _traceback_global(
     seq_b: str,
     traceback: list[list[str | None]],
 ) -> tuple[str, str]:
+    """Reconstruct a global alignment by walking the full traceback matrix."""
     aligned_a = []
     aligned_b = []
     i = len(seq_a)
@@ -79,6 +81,7 @@ def _traceback_affine(
     start_j: int,
     local: bool,
 ) -> tuple[str, str]:
+    """Reconstruct an affine-gap alignment from match/insertion/deletion states."""
     aligned_a: list[str] = []
     aligned_b: list[str] = []
     state = start_state
@@ -86,6 +89,8 @@ def _traceback_affine(
     j = start_j
 
     while i > 0 or j > 0:
+        # Each state corresponds to a different DP matrix:
+        # M = aligned character pair, X = gap in sequence B, Y = gap in sequence A.
         trace = trace_m if state == "M" else trace_x if state == "X" else trace_y
         prev = trace[i][j]
         if prev is None:
@@ -120,6 +125,7 @@ def _traceback_local(
     start_i: int,
     start_j: int,
 ) -> tuple[str, str]:
+    """Reconstruct a local alignment until the zero-reset boundary is reached."""
     aligned_a = []
     aligned_b = []
     i = start_i
@@ -157,6 +163,7 @@ def align(
     gap_open: int = -3,
     gap_extend: int = -1,
 ) -> dict:
+    """Align two sequences with either linear-gap or affine-gap dynamic programming."""
     if mode not in {"global", "local"}:
         raise ValueError("mode must be 'global' or 'local'")
     if gap_model not in {"linear", "affine"}:
@@ -192,11 +199,15 @@ def align(
 
     for i in range(1, rows):
         for j in range(1, cols):
+            # Linear-gap alignment stores one best score per cell and considers
+            # diagonal, vertical, and horizontal predecessor moves.
             diag_score = scores[i - 1][j - 1] + scoring.score_pair(seq_a[i - 1], seq_b[j - 1])
             up_score = scores[i - 1][j] + scoring.gap
             left_score = scores[i][j - 1] + scoring.gap
 
             if mode == "local":
+                # Local alignment resets negative paths to zero so traceback starts
+                # at the highest-scoring local island rather than the matrix corner.
                 best_score = max(0, diag_score, up_score, left_score)
             else:
                 best_score = max(diag_score, up_score, left_score)
@@ -239,9 +250,12 @@ def align(
 
 
 def _align_affine(seq_a: str, seq_b: str, scoring: ScoringScheme, mode: str) -> dict:
+    """Align two sequences with separate matrices for match, insertion, and deletion states."""
     rows = len(seq_a) + 1
     cols = len(seq_b) + 1
 
+    # Affine gaps distinguish opening a gap from extending one, which requires
+    # separate DP states instead of a single score matrix.
     matrix_m = [[NEG_INF] * cols for _ in range(rows)]
     matrix_x = [[NEG_INF] * cols for _ in range(rows)]
     matrix_y = [[NEG_INF] * cols for _ in range(rows)]
@@ -268,6 +282,7 @@ def _align_affine(seq_a: str, seq_b: str, scoring: ScoringScheme, mode: str) -> 
 
     for i in range(1, rows):
         for j in range(1, cols):
+            # Match state can come from any previous state followed by consuming both bases.
             candidates_m = [
                 (matrix_m[i - 1][j - 1], "M"),
                 (matrix_x[i - 1][j - 1], "X"),
@@ -277,6 +292,7 @@ def _align_affine(seq_a: str, seq_b: str, scoring: ScoringScheme, mode: str) -> 
             matrix_m[i][j] = prev_m_score + scoring.score_pair(seq_a[i - 1], seq_b[j - 1])
             trace_m[i][j] = (prev_m_state, "diag")
 
+            # X extends or opens a gap in sequence B; Y does the symmetric case in sequence A.
             candidates_x = [
                 (matrix_m[i - 1][j] + scoring.gap_open, "M"),
                 (matrix_x[i - 1][j] + scoring.gap_extend, "X"),
@@ -294,6 +310,8 @@ def _align_affine(seq_a: str, seq_b: str, scoring: ScoringScheme, mode: str) -> 
             trace_y[i][j] = (prev_y_state, "left")
 
             if mode == "local":
+                # Local affine alignment applies the zero-reset idea independently
+                # to each state matrix, allowing traceback to stop at low-scoring frontiers.
                 if matrix_m[i][j] < 0:
                     matrix_m[i][j] = 0
                     trace_m[i][j] = None
