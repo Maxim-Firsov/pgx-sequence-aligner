@@ -1,6 +1,6 @@
 # PGx Sequence Aligner
 
-Pairwise sequence alignment showcase built around pharmacogenomics-flavored DNA examples. The project emphasizes dynamic programming, scoring schemes, affine versus linear gaps, and exposing the algorithm through both a CLI and a small FastAPI service.
+Pairwise sequence alignment repository built around pharmacogenomics-flavored DNA examples. It implements dynamic programming, configurable scoring schemes, affine versus linear gaps, and exposes the aligner through both a CLI and a small FastAPI service.
 
 ## Problem Statement
 
