@@ -103,7 +103,7 @@ Content-Type: application/json
 ## Running The Project
 
 ```powershell
-python -m pip install -r requirements.txt
+python -m pip install -e .
 python src\cli.py --input data\sample.fasta --mode global --gap-model affine
 python -m unittest discover -s tests
 ```
